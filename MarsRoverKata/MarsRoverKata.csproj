@@ -38,9 +38,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Grid.cs" />
     <Compile Include="InputParser.cs" />
     <Compile Include="Orientation.cs" />
     <Compile Include="Position.cs" />
+    <Compile Include="OrientationCalculator.cs" />
     <Compile Include="PositionCalculator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,4 +1,5 @@
-﻿using MarsRoverKata;
+﻿using System.Collections;
+using MarsRoverKata;
 using NUnit.Framework;
 
 namespace MarsRoverKataTests
@@ -17,8 +18,9 @@ namespace MarsRoverKataTests
         [TestCase('N', "RRR", "0 0 W")]
         public void RotateRightCorrectly(Orientation startingOrientation, string command, string expectedOutput)
         {
-            var positionCalculator = new PositionCalculator();
-            _rover = new Rover(new Position(0, 0), startingOrientation, positionCalculator);
+            var orientationCalculator = new OrientationCalculator();
+            var positionCalculator = new PositionCalculator(new Grid(5, 5));
+            _rover = new Rover(new Position(0, 0), startingOrientation, orientationCalculator, positionCalculator);
 
             Assert.AreEqual(_rover.ExecuteCommand(command), expectedOutput);
         }
@@ -30,85 +32,36 @@ namespace MarsRoverKataTests
         [TestCase('N', "LLL", "0 0 E")]
         public void RotateLeftCorrectly(Orientation startingOrientation, string command, string expectedOutput)
         {
-            var positionCalculator = new PositionCalculator();
-            _rover = new Rover(new Position(0, 0), startingOrientation, positionCalculator);
+            var orientationCalculator = new OrientationCalculator();
+            var positionCalculator = new PositionCalculator(new Grid(5, 5));
+            _rover = new Rover(new Position(0, 0), startingOrientation, orientationCalculator, positionCalculator);
 
             Assert.AreEqual(_rover.ExecuteCommand(command), expectedOutput);
         }
 
-        [TestCase('N', 1, 3, 1, 5)]
-        [TestCase('N', 1, 5, 3, 5)]
-        [TestCase('N', 1, 5, 8, 5)]
-        [TestCase('N', 1, 5, 13, 5)]
-        [TestCase('N', 1, 3, 1, 3)]
-        [TestCase('N', 1, 7, 5, 8)]
-        [TestCase('N', 1, 7, 13, 8)]
-        public void MoveNorthCorrectly(Orientation startingOrientation, int expectedX, int expectedY, int numberOfMoves, int gridHeight)
+        private static IEnumerable PositionTestCases
         {
-            var positionCalculator = new PositionCalculator();
-            _rover = new Rover(new Position(StartingX, StartingY), startingOrientation, positionCalculator);
-
-            var landingPosition = new Position(StartingX, StartingY);
-            landingPosition = CalculateLandingPositionUnderTest(startingOrientation, numberOfMoves, gridHeight, landingPosition);
-
-            Assert.AreEqual(expectedX, landingPosition.X);
-            Assert.AreEqual(expectedY, landingPosition.Y);
-        }
-
-        [TestCase('E', 2, 2, 1, 5)]
-        [TestCase('E', 4, 2, 3, 5)]
-        [TestCase('E', 2, 2, 6, 5)]
-        [TestCase('E', 4, 2, 8, 5)]
-        [TestCase('E', 10, 2, 9, 10)]
-        public void MoveNEastCorrectly(Orientation startingOrientation, int expectedX, int expectedY, int numberOfMoves, int gridWidth)
-        {
-            var positionCalculator = new PositionCalculator();
-            _rover = new Rover(new Position(StartingX, StartingY), startingOrientation, positionCalculator);
-
-            var landingPosition = CalculateLandingPositionUnderTest(startingOrientation, numberOfMoves, gridWidth, new Position(StartingX, StartingY));
-
-            Assert.AreEqual(expectedX, landingPosition.X);
-            Assert.AreEqual(expectedY, landingPosition.Y);
-        }
-
-        [TestCase('W', 5, 2, 1, 5)]
-        [TestCase('W', 3, 2, 3, 5)]
-        [TestCase('W', 3, 2, 8, 5)]
-        [TestCase('W', 5, 2, 6, 10)]
-        public void MoveWestCorrectly(Orientation startingOrientation, int expectedX, int expectedY, int numberOfMoves, int gridWidth)
-        {
-            var positionCalculator = new PositionCalculator();
-            _rover = new Rover(new Position(StartingX, StartingY), startingOrientation, positionCalculator);
-
-            var landingPosition = CalculateLandingPositionUnderTest(startingOrientation, numberOfMoves, gridWidth, new Position(StartingX, StartingY));
-
-            Assert.AreEqual(expectedX, landingPosition.X);
-            Assert.AreEqual(expectedY, landingPosition.Y);
-        }
-
-        [TestCase('S', 1, 1, 1, 5)]
-        [TestCase('S', 1, 5, 2, 5)]
-        [TestCase('S', 1, 4, 8, 5)]
-        [TestCase('S', 1, 7, 7, 12)]
-        public void MoveSouthCorrectly(Orientation startingOrientation, int expectedX, int expectedY, int numberOfMoves, int gridWidth)
-        {
-            var positionCalculator = new PositionCalculator();
-            _rover = new Rover(new Position(StartingX, StartingY), startingOrientation, positionCalculator);
-
-            var landingPosition = CalculateLandingPositionUnderTest(startingOrientation, numberOfMoves, gridWidth, new Position(StartingX, StartingY));
-
-            Assert.AreEqual(expectedX, landingPosition.X);
-            Assert.AreEqual(expectedY, landingPosition.Y);
-        }
-
-        private Position CalculateLandingPositionUnderTest(Orientation startingOrientation, int numberOfMoves, int gridDimension, Position position)
-        {
-            for (var i = 0; i < numberOfMoves; i++)
+            get
             {
-                position = _rover.Move(new Position(position.X, position.Y), startingOrientation, gridDimension);
+                yield return new TestCaseData('N', "M", new Grid(5, 5), "1 3 N");
+                yield return new TestCaseData('N', "MMMM", new Grid(5, 5), "1 1 N");
+                yield return new TestCaseData('E', "M", new Grid(5, 5), "2 2 E");
+                yield return new TestCaseData('E', "MMMMMMMM", new Grid(5, 5), "4 2 E");
+                yield return new TestCaseData('W', "MMM", new Grid(5, 5), "3 2 W");
+                yield return new TestCaseData('W', "MMMMMM", new Grid(5, 5), "5 2 W");
+                yield return new TestCaseData('S', "M", new Grid(5, 5), "1 1 S");
+                yield return new TestCaseData('S', "MMMMMMMMMMMMM", new Grid(5, 5), "1 4 S");
             }
+        }
 
-            return position;
+        [Test, TestCaseSource(nameof(PositionTestCases))]
+        public void MoveCorrectly(Orientation startingOrientation, string command, Grid grid, string expectedOutput)
+        {
+            var orientationCalculator = new OrientationCalculator();
+            var positionCalculator = new PositionCalculator(grid);
+            _rover = new Rover(new Position(StartingX, StartingY), startingOrientation, orientationCalculator, positionCalculator);
+
+            Assert.AreEqual(_rover.ExecuteCommand(command), expectedOutput);
         }
     }
 }

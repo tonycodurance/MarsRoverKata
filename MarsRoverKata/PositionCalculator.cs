@@ -1,41 +1,39 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using static MarsRoverKata.Orientation;
-
-namespace MarsRoverKata
+﻿namespace MarsRoverKata
 {
     public class PositionCalculator
     {
-        public Orientation CalculateOnRight(Orientation orientation)
-        {
-            var rightRotations = new List<Orientation>{North, East, South, West};
+        private readonly Grid _grid;
 
-            return Calculate(rightRotations, orientation);
+        public PositionCalculator(Grid grid)
+        {
+            _grid = grid;
         }
 
-        public Orientation CalculateOnLeft(Orientation orientation)
+        public Position Calculate(Position position, Orientation orientation)
         {
-            var leftRotations = new List<Orientation>{North, West, South, East};
-
-            return Calculate(leftRotations, orientation);            
-        }
-
-        private Orientation Calculate(List<Orientation> rotations, Orientation orientation)
-        {
-            var newOrientationIndex = 0;
-            var currentOrientationIndex = rotations.FindIndex(
-                or => or == orientation
-            );
-
-            var currentOrientationAtTheEndOfList =
-                currentOrientationIndex == rotations.Count - 1;
-
-            if (!currentOrientationAtTheEndOfList)
+            var newX = position.X;
+            var newY = position.Y;
+            
+            if (orientation == Orientation.North)
             {
-                newOrientationIndex = currentOrientationIndex + 1;
+                newY = newY < _grid.Height ? newY + 1 : 1;
             }
 
-            return rotations.ElementAt(newOrientationIndex);
+            if (orientation == Orientation.East)
+            {
+                newX = newX < _grid.Width ? newX + 1 : 1;
+            }
+
+            if (orientation == Orientation.West)
+            {
+                newX = newX > 1 ? newX - 1 : _grid.Width;
+            }
+
+            if (orientation == Orientation.South)
+            {
+                newY = newY > 1 ? newY - 1 : _grid.Height;
+            }
+            return new Position(newX, newY);
         }
     }
 }
